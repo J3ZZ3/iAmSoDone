@@ -12,6 +12,7 @@ import {
   Alert,
   ToastAndroid,
 } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
@@ -20,6 +21,7 @@ import CustomInput from "../components/CustomInput";
 import validateInput from "../utils/InputValid";
 import { RadioButton, RadioGroup } from "../components/RadioButton";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function Registration() {
   const [fullName, setFullName] = useState("");
@@ -31,6 +33,9 @@ export default function Registration() {
 
   const [info, setInfo] = useState("");
 
+const params = useLocalSearchParams();
+
+
   useEffect(() => {
     console.log(fullName);
     console.log(email);
@@ -40,12 +45,17 @@ export default function Registration() {
     console.log(selectedValue);
     
     
+    
   }, [fullName, email, phoneNumber, password, errors, selectedValue]);
 
   useEffect(() => {
     NavigatorBar.setBackgroundColorAsync("#010789");
     NavigatorBar.setBorderColorAsync("#BDBDBD");
   }, []);
+
+  useEffect(() => {
+    console.log({params});
+  }, [{params}]);
 
   handleInput = (type, stateName, value) => {
     setErrors(errors => ({ 
