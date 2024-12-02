@@ -17,8 +17,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, Component } from "react";
 import * as NavigatorBar from "expo-navigation-bar";
-import CustomInput from "../components/CustomInput";
-import {Link} from "expo-router";
+import CustomInput from "../../components/CustomInput";
+import { Link } from "expo-router";
+import { useSession } from "../../ctx";
+
 export default class Login extends Component {
   constructor() {
     // allow you to set initial state to the app before methods are called
@@ -30,7 +32,7 @@ export default class Login extends Component {
     this.state = {
       email: "",
       Password: "",
-      errors: {}
+      errors: {},
     };
   }
 
@@ -38,25 +40,21 @@ export default class Login extends Component {
   //componentDidUpdate: component state/props are updated
   //componentWillUnmount: component will be removed from view
 
+  componentDidUpdate() {
+    console.log({ state: this.state });
+  }
 
-componentDidUpdate() {
-  console.log({state:this.state});
-  
-};
+  componentDidMount() {
+    console.log("mounted");
+    //set the state of the component
+    //fetch data from api and database
+    //add event listeners or subscriptions
+  }
 
-componentDidMount(){
-  console.log('mounted');
-//set the state of the component
-//fetch data from api and database
-//add event listeners or subscriptions
-  
-};
-
-componentWillUnmount() {
-  console.log('unmounted');
-  //for removing event listeners or subscriptions relative to api
-  
-};
+  componentWillUnmount() {
+    console.log("unmounted");
+    //for removing event listeners or subscriptions relative to api
+  }
 
   // const [firstName, setFirstName] = useState('');
   // const [lastName, setLastName] = useState('');
@@ -102,40 +100,53 @@ componentWillUnmount() {
     ToastAndroid.show("User Pressed Button", 5000);
   };
 
- handleInput = (type, stateName, value) => {
-  this.setState(state => ({
-    ...state,
-    errors: {
-      ...state.errors,
-      [stateName]: this.validateInput(type, value)
-    }
-  }))
- };
+  handleInput = (type, stateName, value) => {
+    this.setState((state) => ({
+      ...state,
+      errors: {
+        ...state.errors,
+        [stateName]: this.validateInput(type, value),
+      },
+    }));
+  };
 
- validateInput = (type, value) => {
-  if(value.trim() === "") return {
-  valid: false,
-  error: 'Input required'
-    }
-    if (type === 'email') {
-      return /\S+\@\S+\.\S+/.test(value) ? {
-        valid: true, error: null
-      }: {
-        valid:false, error: 'Email required'}
+  validateInput = (type, value) => {
+    if (value.trim() === "")
+      return {
+        valid: false,
+        error: "Input required",
+      };
+    if (type === "email") {
+      return /\S+\@\S+\.\S+/.test(value)
+        ? {
+            valid: true,
+            error: null,
+          }
+        : {
+            valid: false,
+            error: "Email required",
+          };
     }
 
-      if(type ==='string') {
-        return /([A-Za-z])+/.test(value) ? {
-          valid:true, error:null
-        } : {
-          valid: false, error: 'Only Use Alphabets For Password)'
-        }
-      }
-    
- };
+    if (type === "string") {
+      return /([A-Za-z])+/.test(value)
+        ? {
+            valid: true,
+            error: null,
+          }
+        : {
+            valid: false,
+            error: "Only Use Alphabets For Password)",
+          };
+    }
+  };
+  
 
- render() {
+  render() {
+    const { signIn } = useSession();
+
     return (
+      
       <SafeAreaView style={styles.container}>
         <ImageBackground
           resizeMode="cover"
@@ -148,47 +159,55 @@ componentWillUnmount() {
         >
           <ScrollView contentContainerStyle={styles.ScrollView}>
             <Text style={styles.title}>Login</Text>
-            <CustomInput 
-            name="Email" 
-            onChange={(text) => this.setState({email: text})}
-            onBlur={ () => this.handleInput('email', 'email', this.state.email)}
-            error={this.state.errors?.email?.error}
-
+            <CustomInput
+              name="Email"
+              onChange={(text) => this.setState({ email: text })}
+              onBlur={() =>
+                this.handleInput("email", "email", this.state.email)
+              }
+              error={this.state.errors?.email?.error}
             />
-            <CustomInput 
-            name="Password" 
-            onChange={(text) => this.setState({password: text})}
-            onBlur={ () => this.handleInput('string', 'password', this.state.password)}
-            error={this.state.errors?.password?.error}
+            <CustomInput
+              name="Password"
+              onChange={(text) => this.setState({ password: text })}
+              onBlur={() =>
+                this.handleInput("string", "password", this.state.password)
+              }
+              error={this.state.errors?.password?.error}
             />
             <Pressable style={styles.button}>
-              <Text style={styles.buttonText} onPress={this.handlePress}>
-                Login
-              </Text>
+            <Text
+        onPress={() => {
+          signIn();
+          // Navigate after signing in. You may want to tweak this to ensure sign-in is
+          // successful before navigating.
+          router.replace('/CounterClass');
+        }}>
+        Sign In
+      </Text>
             </Pressable>
             <View>
               <Text style={styles.SignUp}>Don't have an account?</Text>
               <Pressable>
                 <Link
                   style={styles.signUpButton}
-                  href={{pathname:"/Registration", params: {from: "Login", redirectTo: "Home"}}}
+                  href={{
+                    pathname: "/Registration",
+                    params: { from: "Login", redirectTo: "Home" },
+                  }}
                 >
                   Signup
                 </Link>
               </Pressable>
             </View>
-            <Text style={{color: 'BDBDBD'}}>{this.state.email}</Text>
-            <Text style={{color: 'BDBDBD'}}>{this.state.password}</Text>
-
-       </ScrollView>
+            <Text style={{ color: "BDBDBD" }}>{this.state.email}</Text>
+            <Text style={{ color: "BDBDBD" }}>{this.state.password}</Text>
+          </ScrollView>
         </ImageBackground>
       </SafeAreaView>
     );
-  };
+  }
 }
-  
-
-
 
 const styles = StyleSheet.create({
   container: {
