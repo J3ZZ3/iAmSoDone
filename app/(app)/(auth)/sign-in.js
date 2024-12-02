@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 
-import { useSession } from '../ctx';
+import { useSession } from '@/ctx';
 import { useEffect } from 'react';
 
 export default function SignIn() {
@@ -19,7 +19,7 @@ export default function SignIn() {
           signIn();
           // Navigate after signing in. You may want to tweak this to ensure sign-in is
           // successful before navigating.
-          router.replace('/home');
+          router.replace('../home/home');
         }}>
         Sign In
       </Text>

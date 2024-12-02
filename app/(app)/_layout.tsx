@@ -1,10 +1,14 @@
 import { Text } from 'react-native';
-import { Redirect, Stack } from 'expo-router';
+import { Redirect, Stack, usePathname } from 'expo-router';
 
-import { useSession } from '../../ctx';
+import { useSession } from '@/ctx';
 import { useEffect } from 'react';
 
 export default function AppLayout() {
+  // console.log(usePathname());
+  const pathname = usePathname();
+  const authRoutes = ['/sign-in', '/register'];
+  
   const { session, isLoading } = useSession();
   useEffect(() => {
     console.log({ session });
@@ -18,10 +22,14 @@ export default function AppLayout() {
 
   // Only require authentication within the (app) group's layout as users
   // need to be able to access the (auth) group and sign in again.
-  if (!session) {
-    // On web, static rendering will stop here as the user is not authenticated
-    // in the headless Node process that the pages are rendered in.
+  if (!session && !authRoutes.includes(pathname)) {
+
+  //   // On web, static rendering will stop here as the user is not authenticated
+  //   // in the headless Node process that the pages are rendered in.
     return <Redirect href={{ pathname: "/sign-in"}} />;
+  }
+  if (session && authRoutes.includes(pathname)) {
+    return <Redirect href={{ pathname: "/Register"}} />;
   }
 
   // This layout can be deferred because it's not the root layout.

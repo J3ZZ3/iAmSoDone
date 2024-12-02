@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
-
-import { useSession } from '../../ctx';
+import { router } from 'expo-router';
+import { useSession } from '@/ctx';
 
 export default function Index() {
   const { signOut } = useSession();
@@ -12,6 +12,13 @@ export default function Index() {
           signOut();
         }}>
         Sign Out
+      </Text>
+      <Text
+        onPress={() => {
+          // The `app/(app)/_layout.tsx` will redirect to the sign-in screen.
+          router.replace('/sign-in');
+        }}>
+        Sign in now
       </Text>
     </View>
   );

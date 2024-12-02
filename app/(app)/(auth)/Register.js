@@ -17,9 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import * as NavigatorBar from "expo-navigation-bar";
-import CustomInput from "../../components/CustomInput";
-import validateInput from "../../utils/InputValid";
-import { RadioButton, RadioGroup } from "../../components/RadioButton";
+import CustomInput from "../../../components/CustomInput";
+import validateInput from "../../../utils/InputValid";
+import { RadioButton, RadioGroup } from "../../../components/RadioButton";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
