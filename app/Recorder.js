@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, Button, FlatList, TouchableOpacity, ImageBackground, SafeAreaView } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import * as Permissions from 'expo-permissions';
 
 export default function App() {
   const [recording, setRecording] = useState(null);
-  const [sound, setSound] = useState();
   const [recordings, setRecordings] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
 
-  // Request permissions for microphone access
   useEffect(() => {
     const getPermissions = async () => {
       const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
@@ -21,7 +19,6 @@ export default function App() {
     getPermissions();
   }, []);
 
-  // Start recording
   const startRecording = async () => {
     try {
       const { recording } = await Audio.Recording.createAsync(
@@ -34,7 +31,6 @@ export default function App() {
     }
   };
 
-  // Stop recording
   const stopRecording = async () => {
     if (recording) {
       await recording.stopAndUnloadAsync();
@@ -42,13 +38,11 @@ export default function App() {
       setIsRecording(false);
       setRecording(null);
 
-      // Save the recorded file path to the recordings list
       const newRecording = { uri, date: new Date().toLocaleString() };
       setRecordings([...recordings, newRecording]);
     }
   };
 
-  // Play the recorded audio
   const playAudio = async (uri) => {
     const { sound } = await Audio.Sound.createAsync(
       { uri },
@@ -57,27 +51,35 @@ export default function App() {
     setSound(sound);
   };
 
-  // Delete a recording
   const deleteRecording = async (uri) => {
     await FileSystem.deleteAsync(uri);
     setRecordings(recordings.filter((recording) => recording.uri !== uri));
   };
 
   return (
+    <ImageBackground
+        resizeMode="cover"
+        style={{ width: "100%", height: "100%" }}
+        onLoadStart={() => console.log("Loading")}
+        onLoadEnd={() => console.log("Loaded")}
+        source={{
+          uri: "https://i.pinimg.com/736x/59/54/61/59546197baae43e5cd4612bbe1d4424d.jpg",
+        }}>
+    <SafeAreaView>
+      
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Voice Recorder</Text>
 
-      {/* Start/Stop recording buttons */}
+      {}
       {!isRecording ? (
         <Button title="Start Recording" onPress={startRecording} />
       ) : (
         <Button title="Stop Recording" onPress={stopRecording} />
       )}
 
-      {/* List of recordings */}
       <FlatList
         data={recordings}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(_item, index) => index.toString()}
         renderItem={({ item }) => (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text>{item.date}</Text>
@@ -87,5 +89,8 @@ export default function App() {
         )}
       />
     </View>
+    </SafeAreaView>    
+    </ImageBackground>
+
   );
 }
