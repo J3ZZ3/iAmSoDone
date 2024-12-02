@@ -24,7 +24,7 @@ export default function Layout() {
         }}
       >
         <Drawer.Screen
-          name="Login"
+          name="index"
           options={{
             drawerLabel: "Login",
             drawerIcon: () => <Image style={{ width: 20, height: 20 }} source={require("../assets/images/login.png")} />,
@@ -35,6 +35,14 @@ export default function Layout() {
           name="Counter"
           options={{
             drawerLabel: "Counter",
+            drawerIcon: () => <Image style={{ width: 20, height: 20 }} source={require("../assets/images/counter.png")} />,
+            title: "Counter",
+          }}
+        />
+        <Drawer.Screen
+          name="CounterClass"
+          options={{
+            drawerLabel: "CounterClass",
             drawerIcon: () => <Image style={{ width: 20, height: 20 }} source={require("../assets/images/counter.png")} />,
             title: "Counter",
           }}
