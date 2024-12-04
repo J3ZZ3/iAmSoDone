@@ -41,6 +41,7 @@ const TabsPage = () => {
             <Ionicons name="home-outline" size={size} color={color} />
           ),
           tabBarLabel: "Home",
+          headerRight: () => <LogoutButton />,
         }}
         redirect={!isSignedIn}
       />
@@ -57,13 +58,13 @@ const TabsPage = () => {
         redirect={!isSignedIn}
       />
       <Tabs.Screen
-        name="counter"
+        name="recorder"
         options={{
-          headerTitle: "Counter",
+          headerTitle: "Recorder",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="timer-outline" size={size} color={color} />
+            <Ionicons name="mic-outline" size={size} color={color} />
           ),
-          tabBarLabel: "Counter",
+          tabBarLabel: "Recorder",
           headerRight: () => <LogoutButton />,
         }}
         />

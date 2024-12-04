@@ -1,96 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, TouchableOpacity, ImageBackground, SafeAreaView } from 'react-native';
-import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
-import * as Permissions from 'expo-permissions';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  FlatList,
+  ImageBackground,
+} from "react-native";
+import { useState, useCallback } from "react";
+import { StatusBar } from "expo-status-bar";
+import { useRecordings } from "../../components/useRecordings";
+import RecordingItem from "../../components/RecordingItem";
+import RecordButton from "../../components/RecordButton";
 
-export default function App() {
-  const [recording, setRecording] = useState(null);
-  const [recordings, setRecordings] = useState([]);
-  const [isRecording, setIsRecording] = useState(false);
+export default function AudioRecorderApp() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    recordings,
+    startRecording,
+    stopRecording,
+    deleteRecording,
+    renameRecording,
+  } = useRecordings();
 
-  useEffect(() => {
-    const getPermissions = async () => {
-      const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
-      if (status !== 'granted') {
-        alert('Permission to access microphone is required!');
-      }
-    };
-    getPermissions();
-  }, []);
+  const filteredRecordings = recordings.filter((recording) =>
+    recording.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const startRecording = async () => {
-    try {
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(recording);
-      setIsRecording(true);
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }
-  };
-
-  const stopRecording = async () => {
-    if (recording) {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      setIsRecording(false);
-      setRecording(null);
-
-      const newRecording = { uri, date: new Date().toLocaleString() };
-      setRecordings([...recordings, newRecording]);
-    }
-  };
-
-  const playAudio = async (uri) => {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri },
-      { shouldPlay: true }
-    );
-    setSound(sound);
-  };
-
-  const deleteRecording = async (uri) => {
-    await FileSystem.deleteAsync(uri);
-    setRecordings(recordings.filter((recording) => recording.uri !== uri));
-  };
+  const renderItem = useCallback(
+    ({ item }) => (
+      <RecordingItem
+        recording={item}
+        onDelete={() => deleteRecording(item.id)}
+        onRename={(newName) => renameRecording(item.id, newName)}
+      />
+    ),
+    [deleteRecording, renameRecording]
+  );
 
   return (
-    <ImageBackground
-        resizeMode="cover"
-        style={{ width: "100%", height: "100%" }}
-        onLoadStart={() => console.log("Loading")}
-        onLoadEnd={() => console.log("Loaded")}
-        source={{
-          uri: "https://i.pinimg.com/736x/59/54/61/59546197baae43e5cd4612bbe1d4424d.jpg",
-        }}>
-    <SafeAreaView>
-      
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Voice Recorder</Text>
+    <>
+      <StatusBar style="dark" translucent={true} />
 
-      {}
-      {!isRecording ? (
-        <Button title="Start Recording" onPress={startRecording} />
-      ) : (
-        <Button title="Stop Recording" onPress={stopRecording} />
-      )}
+      <ImageBackground
+        source={require("../../assets/bg.jpg")}
+        style={styles.backgroundImage}
+      >
+        <View style={styles.container}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search recordings..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
 
-      <FlatList
-        data={recordings}
-        keyExtractor={(_item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text>{item.date}</Text>
-            <Button title="Play" onPress={() => playAudio(item.uri)} />
-            <Button title="Delete" onPress={() => deleteRecording(item.uri)} />
-          </View>
-        )}
-      />
-    </View>
-    </SafeAreaView>    
-    </ImageBackground>
+          <FlatList
+            data={filteredRecordings}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            style={styles.list}
+          />
 
+          <RecordButton
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+          />
+        </View>
+      </ImageBackground>
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  searchInput: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    borderColor: "#ddd",
+  },
+  list: {
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+});

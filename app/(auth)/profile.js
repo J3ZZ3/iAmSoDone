@@ -13,9 +13,9 @@ const Profile = () => {
         firstName: user.firstName,
         lastName: user,
       });
-      console.log('🚀 ~ file: profile.tsx:16 ~ onSaveUser ~ result:', result);
+      console.log(result);
     } catch (e) {
-      console.log('🚀 ~ file: profile.tsx:18 ~ onSaveUser ~ e', JSON.stringify(e));
+      console.log( JSON.stringify(e));
     }
   };
 
