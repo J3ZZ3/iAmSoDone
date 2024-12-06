@@ -4,6 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library'; 
 import { supabase } from '../config/supabaseClient';
+import {signIn, config } from '../config/google'
+import { INFINITE_TIMEOUT, GDrive } from '@robinbobin/react-native-google-drive-api-wrapper'
+
 
 const RECORDINGS_KEY = '@audio_recordings';
 
@@ -14,6 +17,7 @@ export function useRecordings() {
   useEffect(() => {
     loadRecordings();
     setupAudio();
+    config();
   }, []);
 
   async function setupAudio() {
@@ -121,33 +125,19 @@ export function useRecordings() {
   }
 
   async function uploadRecording(recording) {
-    try {
-      const fileUri = recording.uri;
-      const fileExtension = fileUri.split('.').pop();
-      const fileName = `${recording.id}.${fileExtension}`;
-      
-      const file = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const response = await signIn() 
+      const gdrive = new GDrive()
 
-      const { data, error } = await supabase
-        .storage
-        .from('recordings')
-        .upload(fileName, file, {
-          contentType: `audio/${fileExtension}`,
-          upsert: true,
-        });
+      gdrive.accessToken = response ;
+      gdrive.fetchTimeout = INFINITE_TIMEOUT
 
-      if (error) {
-        throw error;
-      }
 
-      console.log('File uploaded successfully:', data);
-      return data;
-    } catch (error) {
-      console.error('Error uploading recording:', error);
-      throw error;
-    }
+      const file = await gdrive.files.newMultipartUploader()
+      .setIsBase64(true)
+      .setData(base64Audio,'audio/mp4')
+  .setRequestBody({ name: `Recording ${recordings.length + 1}` })
+  .execute()
+
   }
 
   return {
