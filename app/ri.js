@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Button } from 'react-native';
-import { Audio } from 'expo-av';
 import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Platform } from 'react-native';
+import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 
@@ -31,13 +31,21 @@ export default function RecordingItem({ recording, onDelete, onRename, onUpload 
           setIsPlaying(true);
         }
       } else {
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: recording.uri },
-          { shouldPlay: true },
-          onPlaybackStatusUpdate
-        );
-        setSound(newSound);
-        setIsPlaying(true);
+        if (Platform.OS === 'web') {
+          const audio = new Audio(recording.uri);
+          audio.loop = false;
+          audio.play();
+          audio.addEventListener('ended', () => setIsPlaying(false));
+          setIsPlaying(true);
+        } else {
+          const { sound: newSound } = await Audio.Sound.createAsync(
+            { uri: recording.uri },
+            { shouldPlay: true },
+            onPlaybackStatusUpdate
+          );
+          setSound(newSound);
+          setIsPlaying(true);
+        }
       }
     } catch (error) {
       console.error('Error playing sound:', error);
@@ -57,7 +65,7 @@ export default function RecordingItem({ recording, onDelete, onRename, onUpload 
 
   const handleRename = () => {
     if (newName.trim()) {
-      onRename(newName.trim());
+      onRename(recording.id, newName.trim());
       setIsEditing(false);
     }
   };
@@ -68,7 +76,7 @@ export default function RecordingItem({ recording, onDelete, onRename, onUpload 
       "Are you sure you want to delete this recording?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: onDelete }
+        { text: "Delete", style: "destructive", onPress: () => onDelete(recording.id) },
       ]
     );
   };
@@ -106,31 +114,29 @@ export default function RecordingItem({ recording, onDelete, onRename, onUpload 
           {formatTime(position)} / {formatTime(duration)}
         </Text>
         <View style={styles.progressBar}>
-          <View 
+          <View
             style={[
-              styles.progress, 
-              { width: `${(position / duration) * 100}%` }
-            ]} 
+              styles.progress,
+              { width: `${(position / duration) * 100}%` },
+            ]}
           />
         </View>
       </View>
 
       <View style={styles.controls}>
         <TouchableOpacity onPress={playSound} style={styles.button}>
-          <Ionicons 
-            name={isPlaying ? "pause" : "play"} 
-            size={24} 
-            color="#2f95dc" 
+          <Ionicons
+            name={isPlaying ? 'pause' : 'play'}
+            size={24}
+            color="#2f95dc"
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleDelete} style={styles.button}>
           <Ionicons name="trash" size={24} color="#ff4444" />
         </TouchableOpacity>
-        {/* Upload Button */}
-        <Button 
-          title="Upload to Supabase"
-          onPress={() => onUpload(recording)} // Trigger upload
-        />
+        <TouchableOpacity onPress={() => onUpload(recording)} style={styles.button}>
+          <Ionicons name="cloud-upload" size={24} color="#008000" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -157,7 +163,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#666',  
+    color: '#666',
   },
   nameInput: {
     fontSize: 16,
