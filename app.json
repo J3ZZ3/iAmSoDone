@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ayanokoji.recorder"
     },
     "web": {
       "bundler": "metro",
@@ -27,12 +28,22 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      ["expo-document-picker"],
+      [
+        "expo-document-picker"
+      ],
       "expo-router",
       "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "02a4b13f-4f3d-4729-9651-2d2df5d473ce"
+      }
     }
   }
 }

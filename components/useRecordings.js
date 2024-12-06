@@ -3,6 +3,7 @@ import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library'; 
+import { supabase } from '../config/supabaseClient';
 
 const RECORDINGS_KEY = '@audio_recordings';
 
@@ -38,7 +39,7 @@ export function useRecordings() {
             await FileSystem.writeAsStringAsync(path, recording.base64, {
               encoding: FileSystem.EncodingType.Base64,
             });
-            recording.uri = path; // Set URI from the base64 data
+            recording.uri = path;
           }
         }
         setRecordings(recordingsData);
@@ -87,8 +88,8 @@ export function useRecordings() {
         name: `Recording ${recordings.length + 1}`,
         date: new Date().toISOString(),
         duration: status.durationMillis || 0,
-        base64: base64Audio,  // Store base64 encoded audio
-        uri,  // Optional: keep URI for reference
+        base64: base64Audio,
+        uri,
       };
 
       const newRecordings = [...recordings, newRecording];
@@ -119,11 +120,42 @@ export function useRecordings() {
     saveRecordings(newRecordings);
   }
 
+  async function uploadRecording(recording) {
+    try {
+      const fileUri = recording.uri;
+      const fileExtension = fileUri.split('.').pop();
+      const fileName = `${recording.id}.${fileExtension}`;
+      
+      const file = await FileSystem.readAsStringAsync(fileUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const { data, error } = await supabase
+        .storage
+        .from('recordings')
+        .upload(fileName, file, {
+          contentType: `audio/${fileExtension}`,
+          upsert: true,
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('File uploaded successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('Error uploading recording:', error);
+      throw error;
+    }
+  }
+
   return {
     recordings,
     startRecording,
     stopRecording,
     deleteRecording,
     renameRecording,
+    uploadRecording,
   };
 }

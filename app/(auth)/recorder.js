@@ -20,21 +20,12 @@ export default function AudioRecorderApp() {
     stopRecording,
     deleteRecording,
     renameRecording,
+    uploadRecording, // Include uploadRecording function
   } = useRecordings();
 
   const filteredRecordings = recordings.filter((recording) =>
     recording.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const playRecording = async (base64Audio) => {
-    try {
-      const sound = new Audio.Sound();
-      await sound.loadAsync({ uri: base64Audio });
-      await sound.playAsync(); // Play the audio
-    } catch (error) {
-      console.error('Error playing audio:', error);
-    }
-  };
 
   const renderItem = useCallback(
     ({ item }) => (
@@ -42,10 +33,10 @@ export default function AudioRecorderApp() {
         recording={item}
         onDelete={() => deleteRecording(item.id)}
         onRename={(newName) => renameRecording(item.id, newName)}
-        onPlay={() => playRecording(item.base64)} // Play the audio on button click
+        onUpload={uploadRecording} // Pass upload function
       />
     ),
-    [deleteRecording, renameRecording]
+    [deleteRecording, renameRecording, uploadRecording]
   );
 
   return (

@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Button } from 'react-native';
 import { Audio } from 'expo-av';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 
-export default function RecordingItem({ recording, onDelete, onRename }) {
+export default function RecordingItem({ recording, onDelete, onRename, onUpload }) {
   const [sound, setSound] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
@@ -126,6 +126,13 @@ export default function RecordingItem({ recording, onDelete, onRename }) {
         <TouchableOpacity onPress={handleDelete} style={styles.button}>
           <Ionicons name="trash" size={24} color="#ff4444" />
         </TouchableOpacity>
+        <TouchableOpacity 
+        onPress={() => onUpload(recording)}  style={styles.button}>
+          <Ionicons name="cloud-upload" size={24} color="#008000" />
+        </TouchableOpacity>
+                  
+
+        
       </View>
     </View>
   );
