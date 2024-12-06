@@ -7,11 +7,13 @@ const Profile = () => {
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
 
+  
+
   const onSaveUser = async () => {
     try {
       const result = await user.update({
         firstName: user.firstName,
-        lastName: user,
+        lastName: user.lastName,
       });
       console.log(result);
     } catch (e) {
@@ -22,9 +24,8 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <Text style={{ textAlign: 'center' }}>
-        Good morning {user.firstName} {user.lastName}!
+    <Text>Welcome Home, {user?.fullName}</Text>
       </Text>
-
       <TextInput placeholder="First Name" value={firstName} onChangeText={setFirstName} style={styles.inputField} />
       <TextInput placeholder="Last Name" value={lastName} onChangeText={setLastName} style={styles.inputField} />
       <Button onPress={onSaveUser} title="Update account" color={'#6c47ff'}></Button>

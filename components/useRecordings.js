@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library'; 
 
 const RECORDINGS_KEY = '@audio_recordings';
 
@@ -30,7 +31,17 @@ export function useRecordings() {
     try {
       const storedRecordings = await AsyncStorage.getItem(RECORDINGS_KEY);
       if (storedRecordings) {
-        setRecordings(JSON.parse(storedRecordings));
+        const recordingsData = JSON.parse(storedRecordings);
+        for (const recording of recordingsData) {
+          if (recording.base64) {
+            const path = FileSystem.documentDirectory + recording.id + '.m4a';
+            await FileSystem.writeAsStringAsync(path, recording.base64, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            recording.uri = path; // Set URI from the base64 data
+          }
+        }
+        setRecordings(recordingsData);
       }
     } catch (error) {
       console.error('Error loading recordings:', error);
@@ -65,14 +76,19 @@ export function useRecordings() {
       const uri = recording.getURI();
       if (!uri) return;
 
+      const base64Audio = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
       const { sound, status } = await recording.createNewLoadedSoundAsync();
-      
+
       const newRecording = {
         id: Date.now().toString(),
-        uri,
         name: `Recording ${recordings.length + 1}`,
         date: new Date().toISOString(),
         duration: status.durationMillis || 0,
+        base64: base64Audio,  // Store base64 encoded audio
+        uri,  // Optional: keep URI for reference
       };
 
       const newRecordings = [...recordings, newRecording];

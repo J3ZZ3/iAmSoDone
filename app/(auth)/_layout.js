@@ -34,18 +34,6 @@ const TabsPage = () => {
       }}
     >
       <Tabs.Screen
-        name="home"
-        options={{
-          headerTitle: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-          tabBarLabel: "Home",
-          headerRight: () => <LogoutButton />,
-        }}
-        redirect={!isSignedIn}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           headerTitle: "My Profile",

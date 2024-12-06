@@ -10,6 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import { useRecordings } from "../../components/useRecordings";
 import RecordingItem from "../../components/RecordingItem";
 import RecordButton from "../../components/RecordButton";
+import { Audio } from 'expo-av'; 
 
 export default function AudioRecorderApp() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,12 +26,23 @@ export default function AudioRecorderApp() {
     recording.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const playRecording = async (base64Audio) => {
+    try {
+      const sound = new Audio.Sound();
+      await sound.loadAsync({ uri: base64Audio });
+      await sound.playAsync(); // Play the audio
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    }
+  };
+
   const renderItem = useCallback(
     ({ item }) => (
       <RecordingItem
         recording={item}
         onDelete={() => deleteRecording(item.id)}
         onRename={(newName) => renameRecording(item.id, newName)}
+        onPlay={() => playRecording(item.base64)} // Play the audio on button click
       />
     ),
     [deleteRecording, renameRecording]
@@ -41,7 +53,7 @@ export default function AudioRecorderApp() {
       <StatusBar style="dark" translucent={true} />
 
       <ImageBackground
-        source={require("../../assets/bg.jpg")}
+        source={require("./assets/bg.jpg")}
         style={styles.backgroundImage}
       >
         <View style={styles.container}>
