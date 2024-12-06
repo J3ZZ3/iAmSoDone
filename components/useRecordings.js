@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
-import * as MediaLibrary from 'expo-media-library'; 
-import { supabase } from '../config/supabaseClient';
-import {signIn, config } from '../config/google'
+import {signIn, configureGoogleSignIn } from '../config/google'
 import { INFINITE_TIMEOUT, GDrive } from '@robinbobin/react-native-google-drive-api-wrapper'
 
 
@@ -17,7 +15,7 @@ export function useRecordings() {
   useEffect(() => {
     loadRecordings();
     setupAudio();
-    config();
+    configureGoogleSignIn();
   }, []);
 
   async function setupAudio() {
@@ -40,6 +38,8 @@ export function useRecordings() {
         for (const recording of recordingsData) {
           if (recording.base64) {
             const path = FileSystem.documentDirectory + recording.id + '.m4a';
+            console.log(path);
+            
             await FileSystem.writeAsStringAsync(path, recording.base64, {
               encoding: FileSystem.EncodingType.Base64,
             });
@@ -125,6 +125,7 @@ export function useRecordings() {
   }
 
   async function uploadRecording(recording) {
+
       const response = await signIn() 
       const gdrive = new GDrive()
 
